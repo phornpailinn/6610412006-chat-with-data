@@ -119,8 +119,6 @@ if question := st.chat_input("Type your message here..."):
         st.chat_message('assistant').markdown(bot_response)
         
             
-
-    
 except Exception as e :
     st.error(f'An error occurred while generating the response {e}')
 
