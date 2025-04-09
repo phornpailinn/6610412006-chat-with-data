@@ -47,7 +47,7 @@ if gemini_api_key :
     for role, message in st.session_state.chat:
         st.chat_message(role).markdown(message)
 
-    if question := st.chat_input("Ask Here"):
+    if question := st.chat_input("Type your message here..."):
         st.session_state.chat.append(('user', question))
         st.chat_message('user').markdown(question)
 
