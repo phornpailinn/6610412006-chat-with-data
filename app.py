@@ -24,13 +24,15 @@ data_dict_text = '\n'.join('- ' + data_dict_df['column_name'] +
 st.title("🐧 My Chatbot and Data Analysis App") 
 st.subheader("Conversation and Data Analysis")
 
-
-
-try:
-    key = st.secrets['gemini_api_key']
-    genai.configure(api_key=key)
-    model = genai.GenerativeModel('gemini-2.0-flash-lite')
-    
+model = None
+if gemini_api_key :
+  try:
+      key = st.secrets['gemini_api_key']
+      genai.configure(api_key=key)
+      model = genai.GenerativeModel('gemini-2.0-flash-lite')
+      st.success("Gemini API Key successfully configured.")
+  except Exception as e:
+      st.error(f"An error occurred while setting up the Gemini model: {e}")
 
     if "chat" not in st.session_state:
         st.session_state.chat = []
@@ -120,7 +122,7 @@ try:
 
     
 except Exception as e :
-    st.error(f'An error occurred {e}')
+    st.error(f'An error occurred while generating the response {e}')
 
 
 # How many total sale in jan 2025?
