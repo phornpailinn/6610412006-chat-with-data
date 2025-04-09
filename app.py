@@ -34,20 +34,20 @@ if gemini_api_key :
   except Exception as e:
       st.error(f"An error occurred while setting up the Gemini model: {e}")
 
-    if "chat" not in st.session_state:
+if "chat" not in st.session_state:
         st.session_state.chat = []
     
 
-    def role_to_streamlit(role:str) -> str:
-        if role == 'model':
-            return 'assistant'
-        else:
-            return role
+def role_to_streamlit(role:str) -> str:
+    if role == 'model':
+        return 'assistant'
+    else:
+        return role
 
-    for role, message in st.session_state.chat:
-        st.chat_message(role).markdown(message)
+for role, message in st.session_state.chat:
+     st.chat_message(role).markdown(message)
 
-    if question := st.chat_input("Type your message here..."):
+if question := st.chat_input("Type your message here..."):
         st.session_state.chat.append(('user', question))
         st.chat_message('user').markdown(question)
 
@@ -110,7 +110,7 @@ if gemini_api_key :
             answer the question and summarize the answer, 
             include your opinions of the persona of this customer
             '''
-        except Exception as e:
+         except Exception as e:
             st.error(f"❌ Error while executing generated code: {e}")
 
         response = model.generate_content(explain_the_results)
