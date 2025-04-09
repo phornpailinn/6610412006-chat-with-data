@@ -110,7 +110,7 @@ if question := st.chat_input("Type your message here..."):
             answer the question and summarize the answer, 
             include your opinions of the persona of this customer
             '''
-       except Exception as e:
+except Exception as e:
             st.error(f"❌ Error while executing generated code: {e}")
 
         response = model.generate_content(explain_the_results)
