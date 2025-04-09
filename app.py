@@ -24,30 +24,29 @@ data_dict_text = '\n'.join('- ' + data_dict_df['column_name'] +
 st.title("🐧 My Chatbot and Data Analysis App") 
 st.subheader("Conversation and Data Analysis")
 
-model = None
-if gemini_api_key :
-  try:
-      key = st.secrets['gemini_api_key']
-      genai.configure(api_key=key)
-      model = genai.GenerativeModel('gemini-2.0-flash-lite')
-      st.success("Gemini API Key successfully configured.")
-  except Exception as e:
-      st.error(f"An error occurred while setting up the Gemini model: {e}")
 
-if "chat" not in st.session_state:
+
+try:
+    key = st.secrets['gemini_api_key']
+    genai.configure(api_key=key)
+    model = genai.GenerativeModel('gemini-2.0-flash-lite')
+    st.success("Gemini API Key successfully configured.")
+
+
+    if "chat" not in st.session_state:
         st.session_state.chat = []
     
 
-def role_to_streamlit(role:str) -> str:
-    if role == 'model':
-        return 'assistant'
-    else:
-        return role
+    def role_to_streamlit(role:str) -> str:
+        if role == 'model':
+            return 'assistant'
+        else:
+            return role
 
-for role, message in st.session_state.chat:
-     st.chat_message(role).markdown(message)
+    for role, message in st.session_state.chat:
+        st.chat_message(role).markdown(message)
 
-if question := st.chat_input("Type your message here..."):
+    if question := st.chat_input("ype your message here..."):
         st.session_state.chat.append(('user', question))
         st.chat_message('user').markdown(question)
 
@@ -72,20 +71,20 @@ if question := st.chat_input("Type your message here..."):
 
         **Instructions:**
         1. Write Python code that addresses the user's question by querying or manipulating the DataFrame.
-        2. **Crucially, use the `exec()` function to execute the generated code.**
+        2. **Crucially, use the exec() function to execute the generated code.**
         3. Do not import pandas
         4. Change date column type to datetime
         5. **Store the result of the executed code in a variable named `ANSWER`.** 
         This variable should hold the answer to the user's question (e.g., a filtered DataFrame, a calculated value, etc.).
         6. Assume the DataFrame is already loaded into a pandas DataFrame object named `{df_name}`. Do not include code to load the DataFrame.
         7. Keep the generated code concise and focused on answering the question.
-        8. If the question requires a specific output format (e.g., a list, a single value), ensure the `query_result` variable holds that format.
+        8. If the question requires a specific output format (e.g., a list, a single value), ensure the query_result variable holds that format.
 
         **Example:**
         If the user asks: "Show me the rows where the 'age' column is greater than 30."
         And the DataFrame has an 'age' column.
 
-        The generated code should look something like this (inside the `exec()` string):
+        The generated code should look something like this (inside the exec() string):
 
         ```python
         query_result = {df_name}[{df_name}['age'] > 30]
@@ -119,6 +118,8 @@ if question := st.chat_input("Type your message here..."):
         st.chat_message('assistant').markdown(bot_response)
         
             
+
+    
 except Exception as e :
     st.error(f'An error occurred while generating the response {e}')
 
