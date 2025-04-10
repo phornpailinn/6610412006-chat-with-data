@@ -1,13 +1,8 @@
 import streamlit as st
 import google.generativeai as genai
-import pathlib
-import textwrap
 import pandas as pd
-#from IPython.display import display
-#from IPython.display import Markdown
 
-# data
-
+# โหลดข้อมูลจาก GitHub
 url1 = "https://raw.githubusercontent.com/phornpailinn/6610412006-chat-with-data/refs/heads/main/transactions.csv"
 url2 = "https://raw.githubusercontent.com/phornpailinn/6610412006-chat-with-data/refs/heads/main/data_dict.csv"
 
@@ -16,37 +11,38 @@ data_dict_df = pd.read_csv(url2)
 
 df_name = 'transaction_df'
 example_record = transaction_df.head(2).to_string()
-data_dict_text = '\n'.join('- ' + data_dict_df['column_name'] +
-                           ': ' +data_dict_df['data_type'] +
-                           '. ' +data_dict_df['description'])
+data_dict_text = '\n'.join(
+    '- ' + data_dict_df['column_name'] + ': ' + data_dict_df['data_type'] + '. ' + data_dict_df['description']
+)
 
-
+# UI Header
 st.title("🐧 My Chatbot and Data Analysis App") 
 st.subheader("Conversation and Data Analysis")
 
+# 📊 Data Snapshot
+st.markdown("## Data Description")
+st.markdown("This dataset (CSV file) contains transaction data with the following columns:")
+for index, row in data_dict_df.iterrows():
+    st.markdown(f"**{row['column_name']}** ({row['data_type']}): {row['description']}")
+st.markdown("### 🔍 Example Rows from Dataset:")
+st.dataframe(transaction_df.head(5))
 
-
+# Main Chatbot Section
 try:
     key = st.secrets['gemini_api_key']
     genai.configure(api_key=key)
     model = genai.GenerativeModel('gemini-2.0-flash-lite')
-    st.success("Gemini API Key successfully configured.")
-
 
     if "chat" not in st.session_state:
         st.session_state.chat = []
-    
 
-    def role_to_streamlit(role:str) -> str:
-        if role == 'model':
-            return 'assistant'
-        else:
-            return role
+    def role_to_streamlit(role: str) -> str:
+        return 'assistant' if role == 'model' else role
 
     for role, message in st.session_state.chat:
-        st.chat_message(role).markdown(message)
+        st.chat_message(role_to_streamlit(role)).markdown(message)
 
-    if question := st.chat_input("ype your message here..."):
+    if question := st.chat_input("💬 Type your question here..."):
         st.session_state.chat.append(('user', question))
         st.chat_message('user').markdown(question)
 
@@ -79,15 +75,6 @@ try:
         6. Assume the DataFrame is already loaded into a pandas DataFrame object named `{df_name}`. Do not include code to load the DataFrame.
         7. Keep the generated code concise and focused on answering the question.
         8. If the question requires a specific output format (e.g., a list, a single value), ensure the query_result variable holds that format.
-
-        **Example:**
-        If the user asks: "Show me the rows where the 'age' column is greater than 30."
-        And the DataFrame has an 'age' column.
-
-        The generated code should look something like this (inside the exec() string):
-
-        ```python
-        query_result = {df_name}[{df_name}['age'] > 30]
         """
 
         prompt = prompt_template.format(
@@ -97,31 +84,22 @@ try:
             example_record=example_record
         )
         code_response = model.generate_content(prompt)
-        code_text = code_response.text.replace("```", "#")  
-        exec(code_text)  
+        code_text = code_response.text.replace("```", "#")
 
         try:
             exec(code_text)
-
             explain_the_results = f'''
-            the user asked {question}, 
-            here is the results {ANSWER}
-            answer the question and summarize the answer, 
+            the user asked: {question}
+            here is the result: {ANSWER}
+            answer the question and summarize the answer,
             include your opinions of the persona of this customer
             '''
+            response = model.generate_content(explain_the_results)
+            bot_response = response.text
+            st.session_state.chat.append(('assistant', bot_response))
+            st.chat_message('assistant').markdown(bot_response)
         except Exception as e:
             st.error(f"❌ Error while executing generated code: {e}")
 
-        response = model.generate_content(explain_the_results)
-        bot_response = response.text
-        st.session_state.chat.append(('assistant', bot_response))
-        st.chat_message('assistant').markdown(bot_response)
-        
-            
-
-    
-except Exception as e :
-    st.error(f'An error occurred while generating the response {e}')
-
-
-# How many total sale in jan 2025?
+except Exception as e:
+    st.error(f'An error occurred: {e}')
